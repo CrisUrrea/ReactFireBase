@@ -1,9 +1,29 @@
-import React from 'react'
+import React, { useState } from 'react'
 import im1 from '../images/imagen1.jpg'
 import im2 from '../images/imagen2.jpg'
 import im3 from '../images/imagen3.jpg'
 
+import firebaseApp from '../credenciales.js'
+import {getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword} from 'firebase/auth';
+
+const auth = getAuth(firebaseApp);
+
 const Login = () => {
+
+  const [registro, setRegistro] = useState(false);
+
+  const handlerSubmit = async(e)=>{
+    e.preventDefault()
+    const correo = e.target.email.value;
+    const contraseña = e.target.password.value;
+
+    if(registro){
+      await createUserWithEmailAndPassword(auth, correo, contraseña);
+    } else {
+      await signInWithEmailAndPassword(auth, correo, contraseña);
+    }
+  }
+
   return (
     <div className='row container p-4'>
       {/* Creamos nuestro slider */}
@@ -49,7 +69,27 @@ const Login = () => {
       </div>
       {/* Seccion para el formulario */}
       <div className='col-md-4'>
-
+        <div className='mt-5 ms-5'>
+          <h1>{registro ? 'Registrate' : 'Inicia Sesión'}</h1>
+          <form onSubmit={handlerSubmit}>
+            <div className='mb-3'>
+              <label className='form-label'>Direccion de Email</label>
+              <input type='email' className='form-control' placeholder='Ingrese correo' id='email' required></input>
+            </div>
+            <div className='mb-3'>
+              <label className='form-label'>Contraseña</label>
+              <input type='password' className='form-control' placeholder='Ingrese contraseña' id='password' required></input>
+            </div>
+            <button className='btn btn-primary' type='submit'>
+              {registro ? 'Registrate' : 'Inicia Sesión'}
+            </button>
+            <div className='form-group'>
+              <button className='btn btn-secondary mt-4 form-control' onClick={() => setRegistro(!registro)}>
+                {registro ? '¿Ya tienes una cuenta?, Inicia Sesión' : '¿No tienes una cuenta?, Registrate'}
+              </button>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
   )
