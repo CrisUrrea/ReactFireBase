@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import firebaseApp from '../credenciales'
 import {getAuth, signOut} from 'firebase/auth'
 import {getFirestore, collection, addDoc, getDocs, doc, deleteDoc, getDoc, setDoc} from 'firebase/firestore'
@@ -15,6 +15,7 @@ const Home = ({correoUsuario}) => {
   }
 
   const [user, setUser] = useState(valorInicial);
+  const [lista, setLista] = useState([]);
 
   const capturarInputs = (e) => {
     const {name, value} = e.target;
@@ -32,6 +33,27 @@ const Home = ({correoUsuario}) => {
       console.error(error);
     }
     setUser({...valorInicial});
+  }
+
+  useEffect(() =>{
+    const getLista = async() => {
+      try{
+        const querySnapshot = await getDocs(collection(db, 'usuarios'));
+        const docs = [];
+        querySnapshot.forEach((doc) => {
+          docs.push({...doc.data(), id:doc.id});
+        });
+        setLista(docs)
+      } catch (error){
+        console.error(error);
+      }
+    }
+    getLista()
+  }, [lista])
+
+  // funcion para eliminar usuario
+  const deleteUser = async(id) =>{
+    await deleteDoc(doc(db,'usuarios',id))
   }
 
   return (
@@ -54,8 +76,25 @@ const Home = ({correoUsuario}) => {
             </div>
           </form>
         </div>
+        {/* Esta seccion sera la lista de nuestros usuarios */}
         <div className='col-md-8'>
           <h2 className='text-center mb-5'>Lista de Usuarios</h2>
+          <div className='container card'>
+            <div className='card-body'>
+              {
+                lista.map(List => (
+                  <div key={List.id}>
+                    <p>Nombre: {List.nombre}</p>
+                    <p>Edad: {List.edad}</p>
+                    <p>Profesión: {List.profesion}</p>
+
+                    <button className='btn btn-danger' onClick={() => deleteUser(List.id)}>Eliminar</button>
+                    <button className='btn btn-success m-1'>Actualizar</button>
+                  </div>
+                ))
+              }
+            </div>
+          </div>
         </div>
       </div>
     </div>
